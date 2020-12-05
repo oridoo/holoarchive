@@ -60,6 +60,7 @@ def GetData():
     return downloaded, channels
 
 
+# noinspection PyTypeChecker
 def DownloadThread():
     status_bar.update(statusvid="Initializing", force=True)
     while True:
@@ -80,6 +81,7 @@ def DownloadThread():
         bar_format = u'{desc}{desc_pad}{percentage:3.0f}%|{bar}| ' + \
                      u'Channels:{count_0:{len_total}d} ' + \
                      u'[{elapsed}<{eta}, {rate:.2f}{unit_pad}{unit}/s]'
+        # noinspection PyTypeChecker
         status_bar.update(statusvid="Fetching data", force=True)
         downloaded, channels = GetData()
         chan_counter = manager.counter(total=len(channels), unit="channels", desc="Fetching:", color="green",
@@ -152,6 +154,8 @@ def StreamThread():
 
     driver_path = config["ChromeDriverDir"]
     options = webdriver.ChromeOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-gpu')
     options.add_argument("headless")
     options.add_argument("log-level=3")
     while True:

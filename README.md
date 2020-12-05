@@ -1,5 +1,5 @@
 # holoarchive
-Automatization tool written in Python with 2 modules, one for downloading videos from specified text file of YouTube channels using youtube_dl library and second daeomn that captures live streams from the same channel list text file using streamlink.
+Automation tool written in Python with 2 modules, one for downloading videos from specified text file of YouTube channels using youtube_dl library and second daeomn that captures live streams from the same channel list text file using streamlink.
 
 ## Roadmap
 - **Global**
