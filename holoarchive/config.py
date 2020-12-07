@@ -1,8 +1,6 @@
 import configparser
 import os
 
-from holoarchive import *
-
 config = configparser.ConfigParser()
 
 conffile = os.getenv("HOLOARCHIVE_CONFIG") or \
@@ -12,7 +10,8 @@ if not os.path.isfile(conffile):
     config["Global"] = dict(datadirectory=os.path.join(os.path.dirname(__file__), '../Data'),
                             ffmpeg_path="",
                             chromedriver_path="",
-                            ytdl_format="bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best")
+                            ytdl_format="bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best",
+                            max_video_threads="3")
     config["Flask"] = dict(secretkey="9cglace094k7")
 
     config.write(open(conffile, "w"))
@@ -30,3 +29,4 @@ class GlobalConf(object):
     FFMpegPath = config["Global"]["ffmpeg_path"]
     ChromeDriverPath = config["Global"]["chromedriver_path"]
     YTDLFormat = config["Global"]["ytdl_format"]
+    MaxVideoThreads = config["Global"]["max_video_threads"]

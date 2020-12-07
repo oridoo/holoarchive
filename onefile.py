@@ -81,7 +81,6 @@ def DownloadThread():
         bar_format = u'{desc}{desc_pad}{percentage:3.0f}%|{bar}| ' + \
                      u'Channels:{count_0:{len_total}d} ' + \
                      u'[{elapsed}<{eta}, {rate:.2f}{unit_pad}{unit}/s]'
-        # noinspection PyTypeChecker
         status_bar.update(statusvid="Fetching data", force=True)
         downloaded, channels = GetData()
         chan_counter = manager.counter(total=len(channels), unit="channels", desc="Fetching:", color="green",

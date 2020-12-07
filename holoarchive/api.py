@@ -1,10 +1,55 @@
-from holoarchive import ytdl, db
+import shutil
+
+import humanize
+from youtube_dlc import YoutubeDL
+
+from holoarchive import ytdl_dict, db, core, config
+
+ytdl = YoutubeDL(ytdl_dict)
+
 
 def add_channel(data):
     url_list = str(data["url"]).split(",")
     for url in url_list:
-        meta = ytdl.extract_info(url,download=False)
-        if meta and not db.channel_exists(url.rsplit('/', 1)[-1]):
+        meta = ytdl.extract_info(url, download=False)
+        id = url.rsplit('/', 1)[-1]
+        print(id)
+        if meta and not db.channel_exists(id):
             db_tuple = (meta.get("entries")[0]["uploader_id"], url, meta.get("entries")[0]["uploader"],
-                        str(bool(data["dlvideo"])),str(bool(data["dlstream"])))
+                        str(bool(data["dlvideo"])), str(bool(data["dlstream"])))
             db.add_channel(db_tuple)
+    else:
+        return True
+
+
+def remove_channel(data):
+    for id in data:
+        db.remove_channel(id)
+        print("Removed: ", id)
+    else:
+        return True
+
+
+def get_status():
+    disk_usage = shutil.disk_usage(config.GlobalConf.DataDirectory)._asdict()
+    for k, v in disk_usage.items():
+        disk_usage[k] = humanize.naturalsize(v)
+    channel_count = len(core.ctrl.channels)
+    video_count = len(core.ctrl.videos)
+    active_streams = core.ctrl.active_streams
+    active_videos = core.ctrl.active_videos
+    active_fetchers = len(core.ctrl.fetchv_threads) + len(core.ctrl.fetchs_threads)
+    videos_downloaded_count = db.video_count()
+    downloading_streams = str(core.ctrl.download_streams)
+    downloading_videos = str(core.ctrl.download_videos)
+    status = dict(disk=disk_usage,
+                  chan_count=channel_count,
+                  vid_count=video_count,
+                  a_streams=active_streams,
+                  a_videos=active_videos,
+                  a_fetchers=active_fetchers,
+                  down_count=videos_downloaded_count,
+                  dl_streams=downloading_streams,
+                  dl_videos=downloading_videos
+                  )
+    return status
