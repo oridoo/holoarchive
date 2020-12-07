@@ -13,7 +13,7 @@ app.config.from_object(FlaskConf)
 
 ytdl_dict = dict({
     "encoding": "utf-8-sig",
-    "simulate": True,
+    "simulate": False,
     "format": GlobalConf.YTDLFormat,
     "outtmpl": os.path.join(GlobalConf.DataDirectory, "%(uploader)s",
                             "%(title)s - %(uploader)s - %(upload_date)s.%(ext)s"),

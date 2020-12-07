@@ -99,7 +99,7 @@ class Controller:
 
     def _download_videos(self):
         while True:
-            if (len(self.video_threads) <= int(
+            if (len(self.video_threads) < int(
                     config.GlobalConf.MaxVideoThreads)) and self.download_videos and self.videos:
                 vidid = self.videos.pop()
                 url = str("https://www.youtube.com/watch?v=" + vidid)
