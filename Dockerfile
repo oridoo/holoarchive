@@ -10,7 +10,7 @@ RUN pip install -r /app/requirements.txt
 
 ENV HOLOARCHIVE_CONFIG=/persistent/config.ini
 ENV HOLOARCHIVE_DB=/persistent/db.sqlite
-
+ENV PATH /usr/bin/chromedriver:$PATH
 
 
 
