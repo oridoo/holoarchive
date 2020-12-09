@@ -2,6 +2,7 @@ import shutil
 
 import humanize
 from youtube_dlc import YoutubeDL
+from selenium import webdriver
 
 from holoarchive import ytdl_dict, db, core, config
 
@@ -30,12 +31,13 @@ def add_channel(data):
                 pass
         id = url.rsplit('/', 1)[-1]
         print(id)
-        if meta and not db.channel_exists(id):
-            db_tuple = (meta.get("entries")[0]["uploader_id"], url, meta.get("entries")[0]["uploader"],
+        if name and not db.channel_exists(id):
+            db_tuple = (url.rsplit('/', 1)[-1], url, name,
                         str(bool(data["dlvideo"])), str(bool(data["dlstream"])))
             db.add_channel(db_tuple)
-    else:
-        return True
+
+    driver.quit()
+    return True
 
 
 def remove_channel(data):
