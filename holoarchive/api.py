@@ -18,29 +18,28 @@ def add_channel(data):
     options.add_argument('--disable-gpu')
     options.add_argument("headless")
     options.add_argument("--disable-logging")
+    driver = webdriver.Chrome(driver_path, options=options)
+    driver.implicitly_wait(5)
     for url in url_list:
-        driver = webdriver.Chrome(driver_path, options=options)
-        driver.implicitly_wait(5)
         name = False
         for i in range(3):
             try:
                 driver.get(url)
                 div = driver.find_element_by_class_name('ytd-channel-name')
                 name = str(div.text)
+                driver.close()
                 break
             except:
                 pass
-        driver.quit()
         id = url.rsplit('/', 1)[-1]
         print(id)
         if name and not db.channel_exists(id):
             db_tuple = (url.rsplit('/', 1)[-1], url, name,
-                        str(bool(strtobool(data["dlvideo"]))), str(bool(strtobool(data["dlstream"]))))
+                        str(bool(data["dlvideo"])), str(bool(data["dlstream"])))
             db.add_channel(db_tuple)
-        driver.quit()
+    driver.quit()
+    return True
 
-    else:
-        return True
 
 
 def remove_channel(data):

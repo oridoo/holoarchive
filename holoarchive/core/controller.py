@@ -1,14 +1,15 @@
 from distutils.util import strtobool
 import os
+import subprocess
 import threading
 import time
 
 from selenium import webdriver
-from youtube_dlc import YoutubeDL
+import youtube_dlc
 
 from holoarchive import db, config, ytdl_dict
 
-ytdl = YoutubeDL(ytdl_dict)
+ytdl = youtube_dlc.YoutubeDL(ytdl_dict)
 
 
 def video_downloader(link):
@@ -28,13 +29,13 @@ def stream_downloader(link):
             filename = ytdl.prepare_filename(meta)
             if not os.path.exists(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
-            os.system(
+            proc = subprocess.call(
                 f"python -m streamlink --hls-live-restart --ffmpeg-video-transcode h265 --force "
-                f'-o "{filename}" "{link}" best')
+                f'-o "{filename}" "{link}" best', shell=True)
             if os.path.isfile(filename):
                 db_tuple = (meta["id"], link, meta["title"], meta["uploader_id"], filename)
                 db.add_video(db_tuple)
-    except:
+    except youtube_dlc.DownloadError:
         pass
 
 
@@ -61,11 +62,11 @@ class Controller:
 
     def add_videos(self, ids):
         for i in ids:
-            if i not in self.videos or self.active_videos:
+            if (i not in self.videos) and (i not in self.active_videos):
                 self.videos.add(i)
 
     def add_stream(self, url):
-        if url not in self.streams or self.active_streams:
+        if (url not in self.streams) and (url not in self.active_streams):
             self.streams.add(url)
 
     def _updater(self):
@@ -84,12 +85,16 @@ class Controller:
                 if not i.is_alive():
                     self.fetchs_threads.remove(i)
 
+            for i in self.stream_threads:
+                if not i.is_alive():
+                    self.stream_threads.remove(i)
+
             time.sleep(5)
 
     def _fetch_videos(self):
         while True:
             for i in self.channels:
-                if bool(strtobool(i["downloadvideos"])):
+                if i["downloadvideos"] == "True":
                     thread = threading.Thread(target=self.video_fetcher, args=(i["url"],))
                     thread.start()
                     self.fetchv_threads.append(thread)
@@ -97,6 +102,8 @@ class Controller:
                 threading.Thread.join(i)
                 self.download_videos = True
             time.sleep(360)
+
+
     def _download_videos(self):
         while True:
             if (len(self.video_threads) < int(
@@ -112,8 +119,8 @@ class Controller:
     def _fetch_streams(self):
         while True:
             for i in self.channels:
-                if bool(strtobool(i["downloadstreams"])):
-                    thread = threading.Thread(target=self.stream_fetcher, args=([i["id"]],))
+                if i["downloadstreams"] == "True":
+                    thread = threading.Thread(target=self.stream_fetcher, args=(i["id"],))
                     thread.start()
                     self.fetchs_threads.append(thread)
 
@@ -124,11 +131,14 @@ class Controller:
 
     def _download_streams(self):
         while True:
-            if self.download_streams and self.streams:
+            if (self.download_streams is True) and (len(self.streams) > 0):
                 url = self.streams.pop()
                 thread = threading.Thread(target=stream_downloader, args=(url,))
                 thread.start()
-                self.stream_threads.append(thread)
+                time.sleep(5)
+                if thread.is_alive():
+                    self.active_streams.append(url)
+                    self.stream_threads.append(thread)
 
     def video_fetcher(self, chanurl):
         meta = ytdl.extract_info(chanurl, download=False)
@@ -146,16 +156,19 @@ class Controller:
         options.add_argument('--disable-gpu')
         options.add_argument("headless")
         options.add_argument("--disable-logging")
+        options.add_argument("--use-fake-ui-for-media-stream")
         driver = webdriver.Chrome(driver_path, options=options)
         driver.implicitly_wait(5)
         try:
             driver.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
-            div = driver.find_element_by_class_name('ytp-title-text')
-            url = div.find_element_by_css_selector('a').get_attribute('href')
-            driver.quit()
+            div = driver.find_element_by_class_name('ytp-title-link')
+            url = div.get_attribute('href')
             self.add_stream(url)
         except:
             pass
+        finally:
+            driver.close()
+            driver.quit()
 
 
 ctrl = Controller()
