@@ -10,8 +10,24 @@ ytdl = YoutubeDL(ytdl_dict)
 
 def add_channel(data):
     url_list = str(data["url"]).split(",")
+    driver_path = config.GlobalConf.ChromeDriverPath
+    options = webdriver.ChromeOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-gpu')
+    options.add_argument("headless")
+    options.add_argument("--disable-logging")
+    driver = webdriver.Chrome(driver_path, options=options)
+    driver.implicitly_wait(5)
     for url in url_list:
-        meta = ytdl.extract_info(url, download=False)
+        name = False
+        for i in range(3):
+            try:
+                driver.get(url)
+                div = driver.find_element_by_class_name('ytd-channel-name')
+                name = str(div.text)
+                break
+            except:
+                pass
         id = url.rsplit('/', 1)[-1]
         print(id)
         if meta and not db.channel_exists(id):
