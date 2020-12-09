@@ -1,4 +1,5 @@
 import shutil
+from distutils.util import strtobool
 
 import humanize
 from youtube_dlc import YoutubeDL
@@ -33,14 +34,11 @@ def add_channel(data):
         id = url.rsplit('/', 1)[-1]
         print(id)
         if name and not db.channel_exists(id):
-            if data["dlvideo"] == "on": dlvideo = True
-            else: dlvideo = False
-            if data["dlstream"] == "on": dlstream = True
-            else: dlstream = False
             db_tuple = (url.rsplit('/', 1)[-1], url, name,
-                        str(dlvideo), str(dlstream))
+                        str(bool(strtobool(data["dlvideo"]))), str(bool(strtobool(data["dlstream"]))))
             db.add_channel(db_tuple)
         driver.quit()
+
     else:
         return True
 

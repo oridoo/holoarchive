@@ -1,3 +1,4 @@
+from distutils.util import strtobool
 import os
 import threading
 import time
@@ -88,7 +89,7 @@ class Controller:
     def _fetch_videos(self):
         while True:
             for i in self.channels:
-                if bool(i["downloadvideos"]):
+                if bool(strtobool(i["downloadvideos"])):
                     thread = threading.Thread(target=self.video_fetcher, args=(i["url"],))
                     thread.start()
                     self.fetchv_threads.append(thread)
@@ -96,7 +97,6 @@ class Controller:
                 threading.Thread.join(i)
                 self.download_videos = True
             time.sleep(360)
-
     def _download_videos(self):
         while True:
             if (len(self.video_threads) < int(
@@ -112,7 +112,7 @@ class Controller:
     def _fetch_streams(self):
         while True:
             for i in self.channels:
-                if bool(i["downloadstreams"]):
+                if bool(strtobool(i["downloadstreams"])):
                     thread = threading.Thread(target=self.stream_fetcher, args=([i["id"]],))
                     thread.start()
                     self.fetchs_threads.append(thread)
