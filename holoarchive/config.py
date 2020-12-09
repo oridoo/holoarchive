@@ -6,6 +6,7 @@ config = configparser.ConfigParser()
 conffile = os.getenv("HOLOARCHIVE_CONFIG") or \
            os.path.join(os.path.dirname(__file__), "../config.ini")
 
+
 if not os.path.isfile(conffile):
     config["Global"] = dict(datadirectory=os.path.join(os.path.dirname(__file__), '../Data'),
                             ffmpeg_path="",
@@ -18,6 +19,9 @@ if not os.path.isfile(conffile):
 
 else:
     config.read(conffile)
+
+if not os.path.isdir(config["Global"]["DataDirectory"]):
+    os.makedirs(config["Global"]["DataDirectory"])
 
 
 class FlaskConf(object):

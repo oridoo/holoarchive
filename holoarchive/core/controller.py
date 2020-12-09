@@ -94,7 +94,7 @@ class Controller:
                     self.fetchv_threads.append(thread)
             for i in self.fetchv_threads:
                 threading.Thread.join(i)
-            self.download_videos = True
+                self.download_videos = True
             time.sleep(360)
 
     def _download_videos(self):
@@ -116,9 +116,10 @@ class Controller:
                     thread = threading.Thread(target=self.stream_fetcher, args=([i["id"]],))
                     thread.start()
                     self.fetchs_threads.append(thread)
+
             for i in self.fetchs_threads:
                 threading.Thread.join(i)
-            self.download_streams = True
+                self.download_streams = True
             time.sleep(20)
 
     def _download_streams(self):
