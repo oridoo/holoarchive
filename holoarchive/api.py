@@ -33,8 +33,12 @@ def add_channel(data):
         id = url.rsplit('/', 1)[-1]
         print(id)
         if name and not db.channel_exists(id):
+            if data["dlvideo"] == "on": dlvideo = True
+            else: dlvideo = False
+            if data["dlstream"] == "on": dlstream = True
+            else: dlstream = False
             db_tuple = (url.rsplit('/', 1)[-1], url, name,
-                        str(bool(data["dlvideo"])), str(bool(data["dlstream"])))
+                        str(dlvideo), str(dlstream))
             db.add_channel(db_tuple)
         driver.quit()
     else:
