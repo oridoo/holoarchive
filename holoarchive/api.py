@@ -2,6 +2,7 @@ import shutil
 
 import humanize
 from youtube_dlc import YoutubeDL
+from selenium import webdriver
 
 from holoarchive import ytdl_dict, db, core, config
 
@@ -10,16 +11,33 @@ ytdl = YoutubeDL(ytdl_dict)
 
 def add_channel(data):
     url_list = str(data["url"]).split(",")
+    driver_path = config.GlobalConf.ChromeDriverPath
+    options = webdriver.ChromeOptions()
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-gpu')
+    options.add_argument("headless")
+    options.add_argument("--disable-logging")
+    driver = webdriver.Chrome(driver_path, options=options)
+    driver.implicitly_wait(5)
     for url in url_list:
-        meta = ytdl.extract_info(url, download=False)
+        name = False
+        for i in range(3):
+            try:
+                driver.get(url)
+                div = driver.find_element_by_class_name('ytd-channel-name')
+                name = str(div.text)
+                break
+            except:
+                pass
         id = url.rsplit('/', 1)[-1]
         print(id)
-        if meta and not db.channel_exists(id):
-            db_tuple = (meta.get("entries")[0]["uploader_id"], url, meta.get("entries")[0]["uploader"],
+        if name and not db.channel_exists(id):
+            db_tuple = (url.rsplit('/', 1)[-1], url, name,
                         str(bool(data["dlvideo"])), str(bool(data["dlstream"])))
             db.add_channel(db_tuple)
-    else:
-        return True
+
+    driver.quit()
+    return True
 
 
 def remove_channel(data):
