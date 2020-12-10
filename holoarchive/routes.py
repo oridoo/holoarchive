@@ -1,7 +1,11 @@
 from flask import render_template, request, jsonify, make_response
 
 from holoarchive import app, db, api
+from holoarchive.core import ctrl
 
+@app.before_first_request
+def init():
+    ctrl.start()
 
 @app.route("/")
 def index():
