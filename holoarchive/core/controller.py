@@ -2,6 +2,7 @@ import os
 import subprocess
 import threading
 import time
+from multiprocessing import Process
 
 import youtube_dlc
 from selenium import webdriver
@@ -154,7 +155,7 @@ class Controller:
                     config.GlobalConf.MaxVideoThreads)) and self.download_videos and self.videos:
                 vidid = self.videos.pop()
                 url = str("https://www.youtube.com/watch?v=" + vidid)
-                thread = threading.Thread(name=vidid, target=video_downloader, args=(url,))
+                thread = Process(name=vidid, target=video_downloader, args=(url,))
                 thread.start()
                 self.video_threads.append(thread)
                 self.active_videos.append(vidid)
@@ -185,7 +186,7 @@ class Controller:
         while True:
             if (self.download_streams is True) and (len(self.streams) > 0):
                 url = self.streams.pop()
-                thread = threading.Thread(name=url, target=stream_downloader, args=(url,))
+                thread = Process(name=url, target=stream_downloader, args=(url,))
                 thread.start()
                 time.sleep(5)
                 if thread.is_alive():
