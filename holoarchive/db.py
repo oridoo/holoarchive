@@ -60,7 +60,7 @@ def add_video(video):
     """
     Add video record to database
     :param video: (id,url,name,channelid,filename)
-    :return: 1 = success, 0 = fail
+    :returns: bool
     """
     conn = connection()
     if conn:
@@ -76,6 +76,11 @@ def add_video(video):
 
 
 def channel_exists(chanid=str):
+    """
+    Checks if record with channel ID exists
+    :param chanid: Channel ID to check
+    :returns: Boolean
+    """
     conn = connection()
     if conn:
         sql = f"SELECT EXISTS(SELECT 1 FROM channels WHERE id=?)"
@@ -92,7 +97,7 @@ def videos_filter(vidids):
     """
     Returns list of not downloaded videos
     :param vidids: list of video ids
-    :return:
+    :return: list of videos not in database
     """
     conn = connection()
     if conn:
@@ -112,7 +117,7 @@ def videos_filter(vidids):
 
 def select_all_channels():
     """
-    :rtype: list
+    Lists all records of channels in the database
     :return: List of dictionaries(rows)
     """
     conn = connection()
@@ -134,9 +139,8 @@ def select_all_channels():
 def remove_channel(chanid=str):
     """
     Removes a channel from database
-    :rtype: bool
+    :returns: bool
     :param chanid: db id of channel to remove
-    :return:
     """
     conn = connection()
     if conn:
@@ -153,7 +157,7 @@ def remove_channel(chanid=str):
 
 def video_count():
     """
-    :rtype: list
+    Checks for count of video records
     :return: List of dictionaries(rows)
     """
     conn = connection()

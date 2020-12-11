@@ -1,9 +1,8 @@
 import shutil
-from distutils.util import strtobool
 
 import humanize
-from youtube_dlc import YoutubeDL
 from selenium import webdriver
+from youtube_dlc import YoutubeDL
 
 from holoarchive import ytdl_dict, db, core, config
 
@@ -11,6 +10,11 @@ ytdl = YoutubeDL(ytdl_dict)
 
 
 def add_channel(data):
+    """
+    POST API for adding a channel to the database
+    :param data: Dictionary from the request
+    :return:
+    """
     url_list = str(data["url"]).split(",")
     driver_path = config.GlobalConf.ChromeDriverPath
     options = webdriver.ChromeOptions()
@@ -41,8 +45,12 @@ def add_channel(data):
     return True
 
 
-
 def remove_channel(data):
+    """
+    POST API for removing a channel record from the database
+    :param data: List of channel IDs to remove
+    :return:
+    """
     for id in data:
         db.remove_channel(id)
         print("Removed: ", id)
@@ -51,6 +59,10 @@ def remove_channel(data):
 
 
 def get_status():
+    """
+    GET API for getting status of the daemon
+    :rtype: dict
+    """
     disk_usage = shutil.disk_usage(config.GlobalConf.DataDirectory)._asdict()
     for k, v in disk_usage.items():
         disk_usage[k] = humanize.naturalsize(v)

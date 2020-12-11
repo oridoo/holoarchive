@@ -1,11 +1,10 @@
-from distutils.util import strtobool
 import os
 import subprocess
 import threading
 import time
 
-from selenium import webdriver
 import youtube_dlc
+from selenium import webdriver
 
 from holoarchive import db, config, ytdl_dict
 
@@ -13,6 +12,12 @@ ytdl = youtube_dlc.YoutubeDL(ytdl_dict)
 
 
 def video_downloader(link):
+    """
+    Function for downloading a video from youtube
+    and adding record to the database
+    :param link: url of the video
+    :return:
+    """
     print("Attempting download of: " + link)
     meta = ytdl.extract_info(str(link), download=True)
     filename = ytdl.prepare_filename(meta)
@@ -22,6 +27,12 @@ def video_downloader(link):
 
 
 def stream_downloader(link):
+    """
+    Function for downloading stream using streamlink
+    and adding record of it to the database
+    :param link: url of the stream
+    :return:
+    """
     try:
         print("Attempting capture of: " + link)
         meta = ytdl.extract_info(link, download=False)
@@ -40,6 +51,11 @@ def stream_downloader(link):
 
 
 class Controller:
+    """
+    Controller object for managing
+    the archiving daemon
+    """
+
     def __init__(self):
         self.channels = db.select_all_channels()
         self.videos = set()
@@ -54,22 +70,41 @@ class Controller:
         self.download_streams = False
 
     def start(self):
-        threading.Thread(name="updater", target=self._updater).start()
-        threading.Thread(name="video_fetch", target=self._fetch_videos).start()
-        threading.Thread(name="stream_fetch", target=self._fetch_streams).start()
-        threading.Thread(name="video_download", target=self._download_videos).start()
-        threading.Thread(name="stream_download", target=self._download_streams).start()
+        """
+        Starts all the daemons
+        :return:
+        """
+        threading.Thread(name="updater", target=self._updater, daemon=True).start()
+        threading.Thread(name="video_fetch", target=self._fetch_videos, daemon=True).start()
+        threading.Thread(name="stream_fetch", target=self._fetch_streams, daemon=True).start()
+        threading.Thread(name="video_download", target=self._download_videos, daemon=True).start()
+        threading.Thread(name="stream_download", target=self._download_streams, daemon=True).start()
 
     def add_videos(self, ids):
+        """
+        Function for adding list of videos to the object
+        :param ids: List of video ids
+        :return:
+        """
         for i in ids:
             if (i not in self.videos) and (i not in self.active_videos):
                 self.videos.add(i)
 
     def add_stream(self, url):
+        """
+        Function for adding stream url to the object
+        :param ids: Video url
+        :return:
+        """
         if (url not in self.streams) and (url not in self.active_streams):
             self.streams.add(url)
 
     def _updater(self):
+        """
+        Updater loop checking for db updates
+        and dead threads.
+        :return:
+        """
         while True:
             self.channels = db.select_all_channels()
             for i in self.fetchv_threads:
@@ -87,11 +122,16 @@ class Controller:
 
             for i in self.stream_threads:
                 if not i.is_alive():
+                    self.active_streams.remove(i.name)
                     self.stream_threads.remove(i)
 
             time.sleep(5)
 
     def _fetch_videos(self):
+        """
+        Fetcher loop for fetching videos
+        :return:
+        """
         while True:
             for i in self.channels:
                 if i["downloadvideos"] == "True":
@@ -103,8 +143,12 @@ class Controller:
                 self.download_videos = True
             time.sleep(360)
 
-
     def _download_videos(self):
+        """
+        Downloader loop checking for
+        queued videos and downloading them
+        :return:
+        """
         while True:
             if (len(self.video_threads) < int(
                     config.GlobalConf.MaxVideoThreads)) and self.download_videos and self.videos:
@@ -117,6 +161,10 @@ class Controller:
                 time.sleep(5)
 
     def _fetch_streams(self):
+        """
+        Fetcher loop for fetching streams
+        :return:
+        """
         while True:
             for i in self.channels:
                 if i["downloadstreams"] == "True":
@@ -130,10 +178,14 @@ class Controller:
             time.sleep(20)
 
     def _download_streams(self):
+        """
+        Fetcher loop for fetching streams
+        :return:
+        """
         while True:
             if (self.download_streams is True) and (len(self.streams) > 0):
                 url = self.streams.pop()
-                thread = threading.Thread(target=stream_downloader, args=(url,))
+                thread = threading.Thread(name=url, target=stream_downloader, args=(url,))
                 thread.start()
                 time.sleep(5)
                 if thread.is_alive():
@@ -141,6 +193,11 @@ class Controller:
                     self.stream_threads.append(thread)
 
     def video_fetcher(self, chanurl):
+        """
+        Function for fetching videos from youtube channel
+        :param chanurl: URL of the channel
+        :return:
+        """
         meta = ytdl.extract_info(chanurl, download=False)
         if meta:
             ids = []
@@ -150,6 +207,11 @@ class Controller:
             self.add_videos(result)
 
     def stream_fetcher(self, chanid):
+        """
+        Function for fetching stream urls from channel
+        :param chanid: ID of the youtube channel
+        :return:
+        """
         driver_path = config.GlobalConf.ChromeDriverPath
         options = webdriver.ChromeOptions()
         options.add_argument('--no-sandbox')
