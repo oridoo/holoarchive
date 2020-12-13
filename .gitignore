@@ -216,3 +216,9 @@ cython_debug/
 /Data/
 /chromedriver
 /ffmpeg.exe
+
+config.ini
+
+db.sqlite
+
+
