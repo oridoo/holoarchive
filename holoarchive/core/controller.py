@@ -34,6 +34,8 @@ def stream_downloader(link):
     :param link: url of the stream
     :return:
     """
+    if not link:
+        return
     try:
         print("Attempting capture of: " + link)
         meta = ytdl.extract_info(link, download=False)
