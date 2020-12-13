@@ -34,6 +34,8 @@ def stream_downloader(link):
     :param link: url of the stream
     :return:
     """
+    if not link:
+        return
     try:
         print("Attempting capture of: " + link)
         meta = ytdl.extract_info(link, download=False)
@@ -217,7 +219,7 @@ class Controller:
         options = webdriver.ChromeOptions()
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-gpu')
-        options.add_argument("headless")
+        options.add_argument("--headless")
         options.add_argument("--disable-logging")
         options.add_argument("--use-fake-ui-for-media-stream")
         driver = webdriver.Chrome(driver_path, options=options)
