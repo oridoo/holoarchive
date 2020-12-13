@@ -1,4 +1,4 @@
-FROM tiangolo/meinheld-gunicorn-flask:python3.8-alpine3.11
+FROM tiangolo/uwsgi-nginx-flask:python3.8-alpine3.11
 
 COPY holoarchive/ /app/holoarchive/
 COPY ./app.py /app/main.py
