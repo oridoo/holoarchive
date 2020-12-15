@@ -44,13 +44,14 @@ def stream_downloader(link):
             if not os.path.exists(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
             proc = subprocess.call(
-                f"python -m streamlink --hls-live-restart --ffmpeg-video-transcode h265 --force "
+                f"python -m streamlink -Q --hls-live-restart --ffmpeg-video-transcode h265 --force "
                 f'-o "{filename}" "{link}" best', shell=True)
             if os.path.isfile(filename):
                 db_tuple = (meta["id"], link, meta["title"], meta["uploader_id"], filename)
                 db.add_video(db_tuple)
+            time.sleep(30)
     except youtube_dlc.DownloadError:
-        pass
+        return
 
 
 class Controller:
@@ -89,6 +90,7 @@ class Controller:
         :param ids: List of video ids
         :return:
         """
+        ids = list(filter(None, ids))
         for i in ids:
             if (i not in self.videos) and (i not in self.active_videos):
                 self.videos.add(i)
@@ -206,8 +208,10 @@ class Controller:
             ids = []
             for entry in meta["entries"]:
                 ids.append(entry["id"])
-            result = db.videos_filter(ids)
-            self.add_videos(result)
+
+            if len(ids) > 0:
+                result = db.videos_filter(ids)
+                self.add_videos(result)
 
     def stream_fetcher(self, chanid):
         """
@@ -228,9 +232,10 @@ class Controller:
             driver.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
             div = driver.find_element_by_class_name('ytp-title-link')
             url = div.get_attribute('href')
-            self.add_stream(url)
+            if url:
+                self.add_stream(url)
         except:
-            pass
+            return
         finally:
             driver.close()
             driver.quit()

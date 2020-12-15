@@ -22,7 +22,7 @@ def add_channel(data):
     options.add_argument('--disable-gpu')
     options.add_argument("--headless")
     options.add_argument("--disable-logging")
-    driver = webdriver.Chrome(driver_path, options=options)
+    driver = webdriver.Chrome(executable_path=driver_path, options=options)
     driver.implicitly_wait(5)
     for url in url_list:
         name = False
