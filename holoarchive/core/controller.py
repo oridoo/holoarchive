@@ -49,7 +49,7 @@ def stream_downloader(link):
             if os.path.isfile(filename):
                 db_tuple = (meta["id"], link, meta["title"], meta["uploader_id"], filename)
                 db.add_video(db_tuple)
-            time.sleep(30)
+                time.sleep(30)
     except youtube_dlc.DownloadError:
         return
 
