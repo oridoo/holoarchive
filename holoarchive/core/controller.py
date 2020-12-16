@@ -192,7 +192,7 @@ class Controller:
                 url = self.streams.pop()
                 thread = Process(name=url, target=stream_downloader, args=(url,))
                 thread.start()
-                time.sleep(5)
+                time.sleep(15)
                 if thread.is_alive():
                     self.active_streams.append(url)
                     self.stream_threads.append(thread)
