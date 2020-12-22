@@ -166,7 +166,7 @@ class Controller:
                 thread.start()
                 self.video_threads.append(thread)
                 self.active_videos.append(vidid)
-                time.sleep(720)
+                time.sleep(5)
 
     def _fetch_streams(self):
         """
