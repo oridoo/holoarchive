@@ -6,6 +6,7 @@ from multiprocessing import Process
 
 import youtube_dlc
 from selenium import webdriver
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 
 from holoarchive import db, config, ytdl_dict
 
@@ -163,7 +164,7 @@ class Controller:
                 thread.start()
                 self.video_threads.append(thread)
                 self.active_videos.append(vidid)
-                time.sleep(5)
+                time.sleep(720)
 
     def _fetch_streams(self):
         """
@@ -180,7 +181,7 @@ class Controller:
             for i in self.fetchs_threads:
                 threading.Thread.join(i)
                 self.download_streams = True
-            time.sleep(20)
+            time.sleep(30)
 
     def _download_streams(self):
         """
@@ -221,12 +222,18 @@ class Controller:
         """
         driver_path = config.GlobalConf.ChromeDriverPath
         options = webdriver.ChromeOptions()
+        caps = webdriver.DesiredCapabilities.CHROME
+        if config.GlobalConf.SeleniumProxy:
+            prox = Proxy()
+            prox.proxy_type = ProxyType.MANUAL
+            prox.http_proxy = config.GlobalConf.SeleniumProxy
+            prox.add_to_capabilities(caps)
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-gpu')
         options.add_argument("--headless")
         options.add_argument("--disable-logging")
         options.add_argument("--use-fake-ui-for-media-stream")
-        driver = webdriver.Chrome(driver_path, options=options)
+        driver = webdriver.Chrome(driver_path, options=options, desired_capabilities=caps)
         driver.implicitly_wait(5)
         try:
             driver.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
