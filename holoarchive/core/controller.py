@@ -104,8 +104,9 @@ class Controller:
         :param ids: Video url
         :return:
         """
-        if (url not in self.streams) and (url not in self.active_streams):
-            self.streams.add(url)
+        if url in self.streams or url in self.active_streams:
+            return
+        self.streams.add(url)
 
     def _updater(self):
         """
@@ -195,7 +196,7 @@ class Controller:
                 url = self.streams.pop()
                 thread = Process(name=url, target=stream_downloader, args=(url,))
                 thread.start()
-                time.sleep(15)
+                time.sleep(10)
                 if thread.is_alive():
                     self.active_streams.append(url)
                     self.stream_threads.append(thread)
