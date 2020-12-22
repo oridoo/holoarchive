@@ -2,11 +2,9 @@ import os
 
 from flask import Flask
 
-from holoarchive import db
 from holoarchive.config import GlobalConf, FlaskConf
 
-if not os.path.isfile(db.dbfile):
-    db.init_db()
+
 
 app = Flask(__name__)
 app.config.from_object(FlaskConf)

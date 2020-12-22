@@ -62,6 +62,8 @@ class Controller:
     """
 
     def __init__(self):
+        if not os.path.isfile(db.dbfile):
+            db.init_db()
         self.channels = db.select_all_channels()
         self.videos = set()
         self.active_videos = []
