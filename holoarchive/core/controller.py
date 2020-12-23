@@ -51,6 +51,7 @@ def stream_downloader(link):
                 db_tuple = (meta["id"], link, meta["title"], meta["uploader_id"], filename)
                 db.add_video(db_tuple)
                 time.sleep(30)
+            else: return
     except youtube_dlc.DownloadError:
         return
 
@@ -194,9 +195,9 @@ class Controller:
         while True:
             if (self.download_streams is True) and (len(self.streams) > 0):
                 url = self.streams.pop()
-                thread = Process(name=url, target=stream_downloader, args=(url,))
+                thread = threading.Thread(name=url, target=stream_downloader, args=(url,))
                 thread.start()
-                time.sleep(25)
+                time.sleep(15)
                 if thread.is_alive():
                     self.active_streams.append(url)
                     self.stream_threads.append(thread)
