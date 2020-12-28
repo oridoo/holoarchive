@@ -222,3 +222,5 @@ config.ini
 db.sqlite
 
 
+
+.idea/discord.xml
