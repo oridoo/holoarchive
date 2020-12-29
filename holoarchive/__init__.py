@@ -17,6 +17,7 @@ ytdl_dict = dict({
                             "%(title)s - %(uploader)s - %(upload_date)s.%(ext)s"),
     "sleep_interval": 5,
     "quiet": False,
+    'writethumbnail': True,
     "postprocessors": [{'key': 'FFmpegMetadata'},
                        {"key": "EmbedThumbnail"},],
     "ffmpeg_location": GlobalConf.FFMpegPath,
