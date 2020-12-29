@@ -46,7 +46,7 @@ def stream_downloader(link):
                 os.makedirs(os.path.dirname(filename))
             proc = subprocess.call(
                 f"python -m streamlink -Q --hls-live-restart --ffmpeg-video-transcode libx265 "
-                f"--hls-segment-timeout 40 --hls-segment-attempts 2 --hls-timeout 300"
+                f"--hls-segment-timeout 40 --hls-segment-attempts 2 --hls-timeout 300 "
                 f'-o "{filename}" "{link}" best', shell=True)
             if os.path.isfile(filename):
                 db_tuple = (meta["id"], link, meta["title"], meta["uploader_id"], filename)
