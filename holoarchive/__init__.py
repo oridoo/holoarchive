@@ -17,6 +17,8 @@ ytdl_dict = dict({
                             "%(title)s - %(uploader)s - %(upload_date)s.%(ext)s"),
     "sleep_interval": 5,
     "quiet": False,
+    "postprocessors": [{'key': 'FFmpegMetadata'},
+                       {"key": "EmbedThumbnailPP"},],
     "ffmpeg_location": GlobalConf.FFMpegPath,
     "merge-output-format": "mp4",
     "prefer_ffmpeg": True,
