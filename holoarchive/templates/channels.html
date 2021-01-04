@@ -98,7 +98,7 @@
         window.onload = get_channels
 
         async function fetchWithTimeout(resource, options) {
-            const {timeout = 16000} = options;
+            const {timeout = 120000} = options;
 
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);

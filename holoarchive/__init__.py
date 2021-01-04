@@ -9,6 +9,7 @@ from holoarchive.config import GlobalConf, FlaskConf
 app = Flask(__name__)
 app.config.from_object(FlaskConf)
 
+
 ytdl_dict = dict({
     "encoding": "utf-8-sig",
     "simulate": False,

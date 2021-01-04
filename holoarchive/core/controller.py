@@ -3,6 +3,7 @@ import subprocess
 import threading
 import time
 from multiprocessing import Process
+from concurrent.futures import ThreadPoolExecutor
 
 import youtube_dlc
 from selenium import webdriver
@@ -121,22 +122,22 @@ class Controller:
         while True:
             self.channels = db.select_all_channels()
             for i in self.fetchv_threads:
-                if not i.is_alive():
+                if not i.running():
                     self.fetchv_threads.remove(i)
 
-            for i in self.video_threads:
-                if not i.is_alive():
-                    self.active_videos.remove(i.name)
-                    self.video_threads.remove(i)
+            for thread, url in self.video_threads:
+                if not thread.running():
+                    self.active_videos.remove(url)
+                    self.video_threads.remove((thread,url))
 
             for i in self.fetchs_threads:
-                if not i.is_alive():
+                if not i.running():
                     self.fetchs_threads.remove(i)
 
-            for i in self.stream_threads:
-                if not i.is_alive():
-                    self.active_streams.remove(i.name)
-                    self.stream_threads.remove(i)
+            for thread, url in self.stream_threads:
+                if not thread.running():
+                    self.active_streams.remove(url)
+                    self.stream_threads.remove((thread,url))
 
             time.sleep(5)
 
@@ -145,14 +146,16 @@ class Controller:
         Fetcher loop for fetching videos
         :return:
         """
+        pool = ThreadPoolExecutor()
         while True:
             for i in self.channels:
                 if i["downloadvideos"] == "True":
-                    thread = threading.Thread(target=self.video_fetcher, args=(i["url"],))
-                    thread.start()
+                    thread = pool.submit(self.video_fetcher,i["url"],)
+                    #thread = threading.Thread(target=self.video_fetcher, args=(i["url"],))
+                    #thread.start()
                     self.fetchv_threads.append(thread)
             for i in self.fetchv_threads:
-                threading.Thread.join(i)
+                i.done()
                 self.download_videos = True
             time.sleep(360)
 
@@ -162,14 +165,16 @@ class Controller:
         queued videos and downloading them
         :return:
         """
+        pool = ThreadPoolExecutor()
         while True:
             if (len(self.video_threads) < int(
                     config.GlobalConf.MaxVideoThreads)) and self.download_videos and self.videos:
                 vidid = self.videos.pop()
                 url = str("https://www.youtube.com/watch?v=" + vidid)
-                thread = Process(name=vidid, target=video_downloader, args=(url,))
-                thread.start()
-                self.video_threads.append(thread)
+                thread = pool.submit(video_downloader,url,)
+                #thread = Process(name=vidid, target=video_downloader, args=(url,))
+                #thread.start()
+                self.video_threads.append((thread,url))
                 self.active_videos.append(vidid)
                 time.sleep(5)
 
@@ -178,15 +183,17 @@ class Controller:
         Fetcher loop for fetching streams
         :return:
         """
+        pool = ThreadPoolExecutor()
         while True:
             for i in self.channels:
                 if i["downloadstreams"] == "True":
-                    thread = threading.Thread(target=self.stream_fetcher, args=(i["id"],))
-                    thread.start()
+                    thread = pool.submit(self.stream_fetcher, i["id"],)
+                    #thread = threading.Thread(target=self.stream_fetcher, args=(i["id"],))
+                    #thread.start()
                     self.fetchs_threads.append(thread)
 
             for i in self.fetchs_threads:
-                threading.Thread.join(i)
+                i.done()
                 self.download_streams = True
             time.sleep(30)
 
@@ -195,15 +202,17 @@ class Controller:
         Fetcher loop for fetching streams
         :return:
         """
+        pool = ThreadPoolExecutor()
         while True:
             if (self.download_streams is True) and (len(self.streams) > 0):
                 url = self.streams.pop()
-                thread = threading.Thread(name=url, target=stream_downloader, args=(url,))
-                thread.start()
+                if url in self.active_streams: continue
+                thread = pool.submit(stream_downloader, url)
+                #thread = threading.Thread(name=url, target=stream_downloader, args=(url,))
                 time.sleep(15)
-                if thread.is_alive():
+                if thread.running():
                     self.active_streams.append(url)
-                    self.stream_threads.append(thread)
+                    self.stream_threads.append((thread,url))
 
     def video_fetcher(self, chanurl):
         """
