@@ -122,20 +122,20 @@ class Controller:
         while True:
             self.channels = db.select_all_channels()
             for i in self.fetchv_threads:
-                if i.done():
+                if not i.running():
                     self.fetchv_threads.remove(i)
 
             for thread, url in self.video_threads:
-                if thread.done():
+                if not thread.running():
                     self.active_videos.remove(url)
                     self.video_threads.remove((thread,url))
 
             for i in self.fetchs_threads:
-                if i.done():
+                if not i.running():
                     self.fetchs_threads.remove(i)
 
             for thread, url in self.stream_threads:
-                if thread.done():
+                if not thread.running():
                     self.active_streams.remove(url)
                     self.stream_threads.remove((thread,url))
 
@@ -156,6 +156,7 @@ class Controller:
                     self.fetchv_threads.append(thread)
             for i in self.fetchv_threads:
                 i.result()
+                self.fetchv_threads.remove(i)
                 self.download_videos = True
             time.sleep(360)
 
@@ -194,6 +195,7 @@ class Controller:
 
             for i in self.fetchs_threads:
                 i.result()
+                self.fetchs_threads.remove(i)
                 self.download_streams = True
             time.sleep(30)
 
@@ -229,6 +231,7 @@ class Controller:
             if len(ids) > 0:
                 result = db.videos_filter(ids)
                 self.add_videos(result)
+        return True
 
     def stream_fetcher(self, chanid):
         """
