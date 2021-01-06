@@ -122,11 +122,11 @@ class Controller:
                 if not i[0].is_alive():
                     self.fetchv_threads.remove(i)
 
-            for thread, url in self.video_threads:
+            for thread, id in self.video_threads:
                 thread.join(timeout=2)
                 if not thread.is_alive():
-                    self.active_videos.remove(url)
-                    self.video_threads.remove((thread,url))
+                    self.active_videos.remove(id)
+                    self.video_threads.remove((thread,id))
 
             for i in self.fetchs_threads:
                 if not i[0].is_alive():
@@ -169,9 +169,9 @@ class Controller:
                 vidid = self.videos.pop()
                 url = str("https://www.youtube.com/watch?v=" + vidid)
                 print("[holoarchive] Attempting download of: " + url)
-                thread = Process(name=vidid, target=video_downloader, args=(url,))
+                thread = Process(name=vidid, target=video_downloader, args=(url,), daemon=True)
                 thread.start()
-                self.video_threads.append((thread,url))
+                self.video_threads.append((thread,vidid))
                 self.active_videos.append(vidid)
                 time.sleep(5)
 
@@ -205,7 +205,7 @@ class Controller:
                     if len(self.streams) > 0:
                         url = self.streams.pop()
                         print("[holoarchive] Attempting capture of: " + url)
-                        thread = Process(name=url, target=stream_downloader, args=(url,))
+                        thread = Process(name=url, target=stream_downloader, args=(url,), daemon=True)
                         thread.start()
                         procs.append(thread)
                 time.sleep(30)
