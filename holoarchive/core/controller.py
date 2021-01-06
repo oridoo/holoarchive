@@ -205,7 +205,7 @@ class Controller:
                     if len(self.streams) > 0:
                         url = self.streams.pop()
                         print("[holoarchive] Attempting capture of: " + url)
-                        thread = Process(name=url, target=stream_downloader, args=(url,), daemon=True)
+                        thread = threading.Thread(name=url, target=stream_downloader, args=(url,), daemon=True)
                         thread.start()
                         procs.append(thread)
                 time.sleep(30)
