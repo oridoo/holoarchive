@@ -3,7 +3,8 @@ import subprocess
 import threading
 import time
 from multiprocessing import Process
-from concurrent.futures import ThreadPoolExecutor
+from multiprocessing.dummy import Pool
+from concurrent.futures import ThreadPoolExecutor, wait
 
 import youtube_dlc
 from selenium import webdriver
@@ -21,7 +22,6 @@ def video_downloader(link):
     :param link: url of the video
     :return:
     """
-    print("Attempting download of: " + link)
     meta = ytdl.extract_info(str(link), download=True)
     filename = ytdl.prepare_filename(meta)
     if os.path.isfile(filename):
@@ -39,7 +39,6 @@ def stream_downloader(link):
     if not link:
         return
     try:
-        print("Attempting capture of: " + link)
         meta = ytdl.extract_info(link, download=False)
         if meta:
             filename = ytdl.prepare_filename(meta)
@@ -122,23 +121,25 @@ class Controller:
         while True:
             self.channels = db.select_all_channels()
             for i in self.fetchv_threads:
-                if not i.running():
+                if not i[0].is_alive():
                     self.fetchv_threads.remove(i)
 
             for thread, url in self.video_threads:
-                if not thread.running():
+                if not thread.is_alive():
                     self.active_videos.remove(url)
                     self.video_threads.remove((thread,url))
 
             for i in self.fetchs_threads:
-                if not i.running():
+                if not i[0].is_alive():
                     self.fetchs_threads.remove(i)
 
             for thread, url in self.stream_threads:
-                if not thread.running():
+                if not thread.is_alive():
                     self.active_streams.remove(url)
                     self.stream_threads.remove((thread,url))
 
+            if len(self.videos) > 0: self.download_videos = True
+            if len(self.streams) > 0: self.download_streams = True
             time.sleep(5)
 
     def _fetch_videos(self):
@@ -146,19 +147,15 @@ class Controller:
         Fetcher loop for fetching videos
         :return:
         """
-        pool = ThreadPoolExecutor()
         while True:
             for i in self.channels:
-                if i["downloadvideos"] == "True":
-                    thread = pool.submit(self.video_fetcher,i["url"],)
-                    #thread = threading.Thread(target=self.video_fetcher, args=(i["url"],))
-                    #thread.start()
-                    self.fetchv_threads.append(thread)
-            for i in self.fetchv_threads:
-                i.result()
-                self.fetchv_threads.remove(i)
-                self.download_videos = True
-            time.sleep(360)
+                if i["downloadvideos"] == "True" and not any([tid for tid in self.fetchv_threads if tid[1]==i["id"]]):
+                    print("[holoarchive] Starting video fetcher for " + i["name"])
+                    thread = threading.Thread(target=self.video_fetcher, args=(i,), daemon=True)
+                    thread.start()
+                    self.fetchv_threads.append([thread,i["id"]])
+
+            time.sleep(60)
 
     def _download_videos(self):
         """
@@ -166,15 +163,14 @@ class Controller:
         queued videos and downloading them
         :return:
         """
-        pool = ThreadPoolExecutor()
         while True:
             if (len(self.video_threads) < int(
                     config.GlobalConf.MaxVideoThreads)) and self.download_videos and self.videos:
                 vidid = self.videos.pop()
                 url = str("https://www.youtube.com/watch?v=" + vidid)
-                thread = pool.submit(video_downloader,url,)
-                #thread = Process(name=vidid, target=video_downloader, args=(url,))
-                #thread.start()
+                print("[holoarchive] Attempting download of: " + url)
+                thread = Process(name=vidid, target=video_downloader, args=(url,))
+                thread.start()
                 self.video_threads.append((thread,url))
                 self.active_videos.append(vidid)
                 time.sleep(5)
@@ -184,19 +180,16 @@ class Controller:
         Fetcher loop for fetching streams
         :return:
         """
-        pool = ThreadPoolExecutor()
+        #pool = ThreadPoolExecutor()
         while True:
             for i in self.channels:
-                if i["downloadstreams"] == "True":
-                    thread = pool.submit(self.stream_fetcher, i["id"],)
-                    #thread = threading.Thread(target=self.stream_fetcher, args=(i["id"],))
-                    #thread.start()
-                    self.fetchs_threads.append(thread)
 
-            for i in self.fetchs_threads:
-                i.result()
-                self.fetchs_threads.remove(i)
-                self.download_streams = True
+                if i["downloadstreams"] == "True" and not any([tid for tid in self.fetchs_threads if tid[1]==i["id"]]):
+                    print("[holoarchive] Starting stream fetcher for " + i["name"])
+                    thread = threading.Thread(target=self.stream_fetcher, args=(i,), daemon=True)
+                    thread.start()
+                    self.fetchs_threads.append([thread,i["id"]])
+
             time.sleep(30)
 
     def _download_streams(self):
@@ -204,41 +197,52 @@ class Controller:
         Fetcher loop for fetching streams
         :return:
         """
-        pool = ThreadPoolExecutor()
         while True:
             if (self.download_streams is True) and (len(self.streams) > 0):
                 url = self.streams.pop()
-                if url in self.active_streams: continue
-                thread = pool.submit(stream_downloader, url)
-                #thread = threading.Thread(name=url, target=stream_downloader, args=(url,))
+                #thread = pool.submit(stream_downloader, url)
+                print("[holoarchive] Attempting capture of: " + url)
+                thread = Process(name=url, target=stream_downloader, args=(url,))
+                thread.start()
                 time.sleep(15)
-                if thread.running():
+                if thread.is_alive():
                     self.active_streams.append(url)
                     self.stream_threads.append((thread,url))
 
-    def video_fetcher(self, chanurl):
+    def video_fetcher(self, channel):
         """
         Function for fetching videos from youtube channel
         :param chanurl: URL of the channel
         :return:
         """
-        meta = ytdl.extract_info(chanurl, download=False)
-        if meta:
-            ids = []
-            for entry in meta["entries"]:
-                ids.append(entry["id"])
+        chanurl = channel["url"]
+        try:
+            while True:
+                for i in self.channels:
+                    if (i["id"] == channel["id"] and i["downloadvideos"] == "False") or channel not in self.channels:
+                        return
+                meta = ytdl.extract_info(chanurl, download=False)
+                if meta:
+                    ids = []
+                    for entry in meta["entries"]:
+                        ids.append(entry["id"])
 
-            if len(ids) > 0:
-                result = db.videos_filter(ids)
-                self.add_videos(result)
-        return True
+                    if len(ids) > 0:
+                        result = db.videos_filter(ids)
+                        self.add_videos(result)
+                time.sleep(1800)
+        finally:
+            print("[holoarchive] Killing video fetcher for " + channel["name"])
+            return
 
-    def stream_fetcher(self, chanid):
+    def stream_fetcher(self, channel):
         """
         Function for fetching stream urls from channel
         :param chanid: ID of the youtube channel
         :return:
         """
+
+        chanid = channel["id"]
         driver_path = config.GlobalConf.ChromeDriverPath
         options = webdriver.ChromeOptions()
         caps = webdriver.DesiredCapabilities.CHROME
@@ -255,16 +259,24 @@ class Controller:
         driver = webdriver.Chrome(driver_path, options=options, desired_capabilities=caps)
         driver.implicitly_wait(5)
         try:
-            driver.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
-            div = driver.find_element_by_class_name('ytp-title-link')
-            url = div.get_attribute('href')
-            if url:
-                self.add_stream(url)
-        except:
-            return
+            while True:
+                for i in self.channels:
+                    if (i["id"] == channel["id"] and i["downloadstreams"] == "False") or channel not in self.channels:
+                        return
+                try:
+                    driver.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
+                    div = driver.find_element_by_class_name('ytp-title-link')
+                    url = div.get_attribute('href')
+                    if url:
+                        self.add_stream(url)
+                except:
+                    continue
+                time.sleep(30)
         finally:
+            print("[holoarchive] Killing stream fetcher for " + channel["name"])
             driver.close()
             driver.quit()
+            return
 
 
 ctrl = Controller()

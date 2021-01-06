@@ -1,7 +1,8 @@
 from holoarchive import app, routes
 from holoarchive.core import ctrl
-
-ctrl.start()
+@app.before_first_request
+def bfr():
+    ctrl.start()
 
 
 if __name__ == "__main__":
