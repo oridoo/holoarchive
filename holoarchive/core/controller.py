@@ -3,8 +3,6 @@ import subprocess
 import threading
 import time
 from multiprocessing import Process
-from multiprocessing.dummy import Pool
-from concurrent.futures import ThreadPoolExecutor, wait
 
 import youtube_dlc
 from selenium import webdriver
@@ -125,6 +123,7 @@ class Controller:
                     self.fetchv_threads.remove(i)
 
             for thread, url in self.video_threads:
+                thread.join(timeout=2)
                 if not thread.is_alive():
                     self.active_videos.remove(url)
                     self.video_threads.remove((thread,url))
@@ -134,6 +133,7 @@ class Controller:
                     self.fetchs_threads.remove(i)
 
             for thread, url in self.stream_threads:
+                thread.join(timeout=2)
                 if not thread.is_alive():
                     self.active_streams.remove(url)
                     self.stream_threads.remove((thread,url))
@@ -199,15 +199,20 @@ class Controller:
         """
         while True:
             if (self.download_streams is True) and (len(self.streams) > 0):
-                url = self.streams.pop()
                 #thread = pool.submit(stream_downloader, url)
-                print("[holoarchive] Attempting capture of: " + url)
-                thread = Process(name=url, target=stream_downloader, args=(url,))
-                thread.start()
-                time.sleep(15)
-                if thread.is_alive():
-                    self.active_streams.append(url)
-                    self.stream_threads.append((thread,url))
+                procs = []
+                for i in range(5):
+                    if len(self.streams) > 0:
+                        url = self.streams.pop()
+                        print("[holoarchive] Attempting capture of: " + url)
+                        thread = Process(name=url, target=stream_downloader, args=(url,))
+                        thread.start()
+                        procs.append(thread)
+                time.sleep(30)
+                for i in procs:
+                    if i.is_alive():
+                        self.active_streams.append(i.name)
+                        self.stream_threads.append((i,i.name))
 
     def video_fetcher(self, channel):
         """
