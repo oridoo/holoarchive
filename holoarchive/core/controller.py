@@ -273,10 +273,10 @@ class Controller:
                                 date = datetime.datetime.now()
                                 sleeptime = rdate - date
                                 sleeptime = sleeptime.seconds - 20
-                                if sleeptime < 10800 and sleeptime > 30:
+                                if sleeptime < 3600 and sleeptime > 30:
                                     time.sleep(sleeptime)
 
-                                elif sleeptime > 10800:
+                                elif sleeptime > 3600:
                                     time.sleep(720)
 
                         if meta: self.add_stream(url)
