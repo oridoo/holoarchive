@@ -15,7 +15,7 @@ itsdangerous==1.1.0
 Jinja2==2.11.2
 jinxed==1.0.1
 MarkupSafe==1.1.1
-pycryptodome==3.9.8
+pycryptodome==3.9.9
 PySocks==1.7.1
 requests==2.24.0
 selenium==3.141.0

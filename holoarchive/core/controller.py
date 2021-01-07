@@ -1,8 +1,9 @@
 import os
 import subprocess
 import threading
-import time
+import time, datetime
 from multiprocessing import Process
+import dateparser
 
 import youtube_dlc
 from selenium import webdriver
@@ -47,7 +48,6 @@ def stream_downloader(link):
                 f"--hls-segment-timeout 40 --hls-segment-attempts 2 --hls-timeout 300 "
                 f'-o "{filename}" "{link}" best', shell=True)
             if os.path.isfile(filename):
-                ytdl.process_info(meta)
                 ytdl.post_process(filename, ie_info=meta)
                 db_tuple = (meta["id"], link, meta["title"], meta["uploader_id"], filename)
                 db.add_video(db_tuple)
@@ -274,10 +274,23 @@ class Controller:
                     url = div.get_attribute('href')
                     if url:
                         meta = None
-                        try:
-                            meta = ytdl.extract_info(url,download=False)
+                        for i in range(3):
+                            try:
+                                meta = ytdl.extract_info(url,download=False)
+                                break
+                            except youtube_dlc.DownloadError as e:
+                                print(e)
+                                rdate = str(e).removeprefix("ERROR: This live event will begin ")
+                                rdate = dateparser.parse(rdate)
+                                date = datetime.datetime.now()
+                                sleeptime = rdate - date
+                                sleeptime = sleeptime.seconds - 20
+                                if sleeptime < 10800 and sleeptime > 30:
+                                    time.sleep(sleeptime)
+                                    
+                                elif sleeptime > 10800:
+                                    time.sleep(720)
 
-                        except youtube_dlc.DownloadError: pass
                         if meta: self.add_stream(url)
                 except:
                     continue

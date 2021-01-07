@@ -224,3 +224,5 @@ db.sqlite
 
 
 .idea/discord.xml
+
+venv2/
