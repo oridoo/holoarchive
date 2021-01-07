@@ -47,8 +47,8 @@ def stream_downloader(link):
                 f"--hls-segment-timeout 40 --hls-segment-attempts 2 --hls-timeout 300 "
                 f'-o "{filename}" "{link}" best', shell=True)
             if os.path.isfile(filename):
-                ie = ytdl.process_info(meta)
-                ytdl.post_process(filename, ie)
+                ytdl.process_info(meta)
+                ytdl.post_process(filename, ie_info=meta)
                 db_tuple = (meta["id"], link, meta["title"], meta["uploader_id"], filename)
                 db.add_video(db_tuple)
                 time.sleep(30)
