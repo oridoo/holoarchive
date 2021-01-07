@@ -17,22 +17,11 @@ def add_channel(data):
     :return:
     """
     url_list = str(data["url"]).split(",")
-    # driver_path = config.GlobalConf.ChromeDriverPath
-    # options = webdriver.ChromeOptions()
-    # options.add_argument('--no-sandbox')
-    # options.add_argument('--disable-gpu')
-    # options.add_argument("--headless")
-    # options.add_argument("--disable-logging")
-    # driver = webdriver.Chrome(executable_path=driver_path, options=options)
-    # driver.implicitly_wait(5)
+
     for url in url_list:
         name = False
         for i in range(3):
             try:
-                # driver.get(url)
-                # div = driver.find_element_by_class_name('ytd-channel-name')
-                # name = str(div.text)
-                # driver.close()
                 req = requests.get(url)
                 soup = BeautifulSoup(req.content, "html.parser")
                 meta = soup.find("meta", attrs={"property": "og:title"})
@@ -46,7 +35,6 @@ def add_channel(data):
             db_tuple = (url.rsplit('/', 1)[-1], url, name,
                         str(bool(data["dlvideo"])), str(bool(data["dlstream"])))
             db.add_channel(db_tuple)
-    # driver.quit()
     return True
 
 

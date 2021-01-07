@@ -180,7 +180,6 @@ class Controller:
         Fetcher loop for fetching streams
         :return:
         """
-        #pool = ThreadPoolExecutor()
         while True:
             for i in self.channels:
 
@@ -248,31 +247,17 @@ class Controller:
         """
 
         chanid = channel["id"]
-        # driver_path = config.GlobalConf.ChromeDriverPath
-        # options = webdriver.ChromeOptions()
-        # caps = webdriver.DesiredCapabilities.CHROME
-        # if config.GlobalConf.SeleniumProxy:
-        #     prox = Proxy()
-        #     prox.proxy_type = ProxyType.MANUAL
-        #     prox.http_proxy = config.GlobalConf.SeleniumProxy
-        #     prox.add_to_capabilities(caps)
-        # options.add_argument('--no-sandbox')
-        # options.add_argument('--disable-gpu')
-        # options.add_argument("--headless")
-        # options.add_argument("--disable-logging")
-        # options.add_argument("--use-fake-ui-for-media-stream")
-        # driver = webdriver.Chrome(driver_path, options=options, desired_capabilities=caps)
-        # driver.implicitly_wait(5)
+        proxy = None
+        if config.GlobalConf.ScraperProxy:
+            proxy = {"http" : config.GlobalConf.ScraperProxy}
+
         try:
             while True:
                 for i in self.channels:
                     if (i["id"] == channel["id"] and i["downloadstreams"] == "False") or channel not in self.channels:
                         return
                 try:
-                    # driver.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
-                    # div = driver.find_element_by_class_name('ytp-title-link')
-                    # url = div.get_attribute('href')
-                    req = requests.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
+                    req = requests.get("https://www.youtube.com/embed/live_stream?channel=" + chanid, proxies=proxy)
                     soup = BeautifulSoup(req.content, "html.parser")
                     div = soup.find("div", attrs={"class" : "submessage"})
                     url = div.find("a")["href"]
@@ -300,8 +285,6 @@ class Controller:
                 time.sleep(30)
         finally:
             print("[holoarchive] Killing stream fetcher for " + channel["name"])
-            # driver.close()
-            # driver.quit()
             return
 
 
