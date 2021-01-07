@@ -273,7 +273,12 @@ class Controller:
                     div = driver.find_element_by_class_name('ytp-title-link')
                     url = div.get_attribute('href')
                     if url:
-                        self.add_stream(url)
+                        meta = None
+                        try:
+                            meta = ytdl.extract_info(url,download=False)
+
+                        except youtube_dlc.DownloadError: pass
+                        if meta: self.add_stream(url)
                 except:
                     continue
                 time.sleep(30)
