@@ -11,12 +11,11 @@ WORKDIR /app
 
 EXPOSE 5000
 
-RUN apk add gcc g++ make libffi-dev openssl-dev chromium-chromedriver chromium ffmpeg
+RUN apk add gcc g++ make libffi-dev openssl-dev ffmpeg
 RUN pip install -r /app/requirements.txt
 
 ENV HOLOARCHIVE_CONFIG=/persistent/config.ini
 ENV HOLOARCHIVE_DB=/persistent/db.sqlite
-ENV PATH /usr/bin/chromedriver:$PATH
 ENV PATH /usr/bin/ffmpeg:$PATH
 
 ENTRYPOINT [ "python" ]

@@ -3,11 +3,11 @@ import subprocess
 import threading
 import time, datetime
 from multiprocessing import Process
-import dateparser
+import requests
 
+import dateparser
 import youtube_dlc
-from selenium import webdriver
-from selenium.webdriver.common.proxy import Proxy, ProxyType
+from bs4 import BeautifulSoup
 
 from holoarchive import db, config, ytdl_dict
 
@@ -248,30 +248,34 @@ class Controller:
         """
 
         chanid = channel["id"]
-        driver_path = config.GlobalConf.ChromeDriverPath
-        options = webdriver.ChromeOptions()
-        caps = webdriver.DesiredCapabilities.CHROME
-        if config.GlobalConf.SeleniumProxy:
-            prox = Proxy()
-            prox.proxy_type = ProxyType.MANUAL
-            prox.http_proxy = config.GlobalConf.SeleniumProxy
-            prox.add_to_capabilities(caps)
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-gpu')
-        options.add_argument("--headless")
-        options.add_argument("--disable-logging")
-        options.add_argument("--use-fake-ui-for-media-stream")
-        driver = webdriver.Chrome(driver_path, options=options, desired_capabilities=caps)
-        driver.implicitly_wait(5)
+        # driver_path = config.GlobalConf.ChromeDriverPath
+        # options = webdriver.ChromeOptions()
+        # caps = webdriver.DesiredCapabilities.CHROME
+        # if config.GlobalConf.SeleniumProxy:
+        #     prox = Proxy()
+        #     prox.proxy_type = ProxyType.MANUAL
+        #     prox.http_proxy = config.GlobalConf.SeleniumProxy
+        #     prox.add_to_capabilities(caps)
+        # options.add_argument('--no-sandbox')
+        # options.add_argument('--disable-gpu')
+        # options.add_argument("--headless")
+        # options.add_argument("--disable-logging")
+        # options.add_argument("--use-fake-ui-for-media-stream")
+        # driver = webdriver.Chrome(driver_path, options=options, desired_capabilities=caps)
+        # driver.implicitly_wait(5)
         try:
             while True:
                 for i in self.channels:
                     if (i["id"] == channel["id"] and i["downloadstreams"] == "False") or channel not in self.channels:
                         return
                 try:
-                    driver.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
-                    div = driver.find_element_by_class_name('ytp-title-link')
-                    url = div.get_attribute('href')
+                    # driver.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
+                    # div = driver.find_element_by_class_name('ytp-title-link')
+                    # url = div.get_attribute('href')
+                    req = requests.get("https://www.youtube.com/embed/live_stream?channel=" + chanid)
+                    soup = BeautifulSoup(req.content, "html.parser")
+                    div = soup.find("div", attrs={"class" : "submessage"})
+                    url = div.find("a")["href"]
                     if url:
                         meta = None
                         for i in range(3):
@@ -279,7 +283,6 @@ class Controller:
                                 meta = ytdl.extract_info(url,download=False)
                                 break
                             except youtube_dlc.DownloadError as e:
-                                print(e)
                                 rdate = str(e).removeprefix("ERROR: This live event will begin ")
                                 rdate = dateparser.parse(rdate)
                                 date = datetime.datetime.now()
@@ -297,8 +300,8 @@ class Controller:
                 time.sleep(30)
         finally:
             print("[holoarchive] Killing stream fetcher for " + channel["name"])
-            driver.close()
-            driver.quit()
+            # driver.close()
+            # driver.quit()
             return
 
 
