@@ -287,7 +287,7 @@ class Controller:
                                 sleeptime = sleeptime.seconds - 20
                                 if sleeptime < 10800 and sleeptime > 30:
                                     time.sleep(sleeptime)
-                                    
+
                                 elif sleeptime > 10800:
                                     time.sleep(720)
 
