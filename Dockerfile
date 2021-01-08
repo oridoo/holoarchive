@@ -12,6 +12,7 @@ WORKDIR /app
 EXPOSE 5000
 
 RUN apk add gcc g++ make libffi-dev openssl-dev ffmpeg
+RUN apk add atomicparsley --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
 RUN pip install -r /app/requirements.txt
 
 ENV HOLOARCHIVE_CONFIG=/persistent/config.ini
