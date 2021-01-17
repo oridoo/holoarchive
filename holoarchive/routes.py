@@ -36,7 +36,7 @@ def remove_channel():
     return res
 
 @app.route("/api/add-video", methods=["POST"])
-def add_channel():
+def add_video():
     req = request.get_json()
     print(req)
     if api.add_video(req["vidid"], req["force"]):
