@@ -21,7 +21,7 @@ ytdl_dict = dict({
     'writethumbnail': True,
     "postprocessors": [{'key': 'FFmpegMetadata'},
                        {"key": "EmbedThumbnail"},
-                       {"key": "FFmpegVideoConvertorPP",
+                       {"key": "FFmpegVideoConvertor",
                         "preferedformat": "mp4"}],
     "ffmpeg_location": GlobalConf.FFMpegPath,
     "merge-output-format": "mp4",
