@@ -94,6 +94,7 @@
 {% endblock %}
 
 {% block script %}
+
     <script>
         window.onload = get_channels
 
@@ -216,11 +217,11 @@
                                 dlstreams = row.insertCell(4);
 
                             number.outerHTML = "<th scope=\"row\">\n" +
-                                "                           <label class=\"form-check-label\">\n" +
-                                "                                " + (i + 1) + " <input name=\"chan-checkbox\" type=\"checkbox\" \n" +
-                                "                                                        id=\"" + dict["id"] + "\">\n" +
-                                "                           </label>\n" +
-                                "                        </th>";
+                                "<label class=\"form-check-label\">\n" +
+                                (i + 1) + " <input name=\"chan-checkbox\" type=\"checkbox\" \n" +
+                                "id=\"" + dict["id"] + "\">\n" +
+                                "</label>\n" +
+                                " </th>";
                             name.outerHTML = "<td>" + dict["name"] + "</td>";
                             url.outerHTML = "<td><a href=\"" + (dict["url"]) + "\" target=\"_blank\">" + dict["url"] + "</a></td>";
                             if (dict["downloadvideos"] === "True") {

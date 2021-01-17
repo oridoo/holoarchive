@@ -1,4 +1,4 @@
-import shutil
+import shutil, os
 import requests
 
 from bs4 import BeautifulSoup
@@ -50,6 +50,37 @@ def remove_channel(data):
     else:
         return True
 
+# TODO frontend
+def check_online(vidid):
+    meta = ytdl.extract_info(vidid, download=False)
+    if meta:
+        return True
+    else:
+        return False
+
+def check_offline(vidid):
+    if db.video_exists(vidid):
+        video = db.select_video(vidid)
+        if os.path.isfile(video["filename"]):
+            return True
+        else: return None
+    else:
+        return None
+
+def remove_video(vidid):
+    if db.video_exists(vidid):
+        db.remove_video(vidid)
+        return True
+    else:
+        return False
+
+def add_video(vidid, force=False):
+    if force:
+        core.ctrl.start_video_download(vidid)
+        return True
+    else:
+        core.ctrl.add_videos([vidid])
+        return True
 
 def get_status():
     """

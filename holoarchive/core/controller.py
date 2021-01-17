@@ -44,7 +44,7 @@ def stream_downloader(link):
             if not os.path.exists(os.path.dirname(filename)):
                 os.makedirs(os.path.dirname(filename))
             proc = subprocess.call(
-                f"python -m streamlink -Q --hls-live-restart --ffmpeg-video-transcode libx265 "
+                f"python -m streamlink -Q --hls-live-restart "
                 f"--hls-segment-timeout 40 --hls-segment-attempts 2 --hls-timeout 300 "
                 f'-o "{filename}" "{link}" best', shell=True)
             if os.path.isfile(filename):
@@ -53,6 +53,7 @@ def stream_downloader(link):
                 ytdl.process_info(meta)
                 ytdl.post_process(filename, ie_info=meta)
                 time.sleep(30)
+
             else: return
     except youtube_dlc.DownloadError:
         return
@@ -111,6 +112,14 @@ class Controller:
             return
         self.streams.add(url)
 
+    def start_video_download(self, vidid):
+        url = str("https://www.youtube.com/watch?v=" + vidid)
+        print("[holoarchive] Attempting download of: " + url)
+        thread = Process(name=vidid, target=video_downloader, args=(url,), daemon=True)
+        thread.start()
+        self.video_threads.append((thread, vidid))
+        self.active_videos.append(vidid)
+
     def _updater(self):
         """
         Updater loop checking for db updates
@@ -168,12 +177,7 @@ class Controller:
             if (len(self.video_threads) < int(
                     config.GlobalConf.MaxVideoThreads)) and self.download_videos and self.videos:
                 vidid = self.videos.pop()
-                url = str("https://www.youtube.com/watch?v=" + vidid)
-                print("[holoarchive] Attempting download of: " + url)
-                thread = Process(name=vidid, target=video_downloader, args=(url,), daemon=True)
-                thread.start()
-                self.video_threads.append((thread,vidid))
-                self.active_videos.append(vidid)
+                self.start_video_download(vidid)
                 time.sleep(5)
 
     def _fetch_streams(self):

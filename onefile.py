@@ -12,7 +12,7 @@ import youtube_dl as yt
 from selenium import webdriver
 
 parser = argparse.ArgumentParser(
-    description="Download all videos and capture livestreams from a list of youtube channels.")  # TODO
+    description="Download all videos and capture livestreams from a list of youtube channels.")
 
 parser.add_argument("-g", "--generate-config", action="store_true", help="generate new config and exit")
 args = parser.parse_args()

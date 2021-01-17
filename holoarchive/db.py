@@ -92,6 +92,23 @@ def channel_exists(chanid=str):
     else:
         return None
 
+def video_exists(vidid=str):
+    """
+    Checks if record with channel ID exists
+    :param chanid: Channel ID to check
+    :returns: Boolean
+    """
+    conn = connection()
+    if conn:
+        sql = f"SELECT EXISTS(SELECT 1 FROM videos WHERE id=?)"
+        c = sqlite3.Cursor(conn)
+        c.execute(sql, [vidid])
+        result = bool(c.fetchall()[0][0])
+        conn.close()
+        return result
+    else:
+        return None
+
 
 def videos_filter(vidids):
     """
@@ -135,6 +152,25 @@ def select_all_channels():
     else:
         return None
 
+def select_video(vidid):
+    """
+    Lists all records of channels in the database
+    :return: List of dictionaries(rows)
+    """
+    conn = connection()
+    if conn:
+        sql = "SELECT * FROM videos WHERE id=?"
+        # conn.row_factory = sqlite3.Row
+        c = sqlite3.Cursor(conn)
+        c.execute(sql,[vidid])
+        colname = c.description
+        row = c.fetchall()[0]
+        conn.close()
+        result = dict(zip(colname, row))
+
+        return result
+    else:
+        return None
 
 def remove_channel(chanid=str):
     """
@@ -170,3 +206,21 @@ def video_count():
         return result
     else:
         return None
+
+def remove_video(vidid=str):
+    """
+    Removes a video from database
+    :returns: bool
+    :param chanid: db id of channel to remove
+    """
+    conn = connection()
+    if conn:
+        sql = "DELETE FROM videos WHERE id=?"
+        print(sql)
+        c = sqlite3.Cursor(conn)
+        c.execute(sql, [vidid])
+        conn.commit()
+        conn.close()
+        return True
+    else:
+        return False
