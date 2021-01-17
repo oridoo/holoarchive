@@ -66,6 +66,7 @@ def add_video(video):
     if conn:
         sql = """INSERT INTO videos(id,url,name,channelid,filename)
                      VALUES (?,?,?,?,?)"""
+        print(f"[holoarchive] Adding video {video[0]} to the database")
         c = sqlite3.Cursor(conn)
         c.execute(sql, video)
         conn.commit()
@@ -163,7 +164,7 @@ def select_video(vidid):
         # conn.row_factory = sqlite3.Row
         c = sqlite3.Cursor(conn)
         c.execute(sql,[vidid])
-        colname = c.description
+        colname = [d[0] for d in c.description]
         row = c.fetchall()[0]
         conn.close()
         result = dict(zip(colname, row))
@@ -181,7 +182,6 @@ def remove_channel(chanid=str):
     conn = connection()
     if conn:
         sql = "DELETE FROM channels WHERE id=?"
-        print(sql)
         c = sqlite3.Cursor(conn)
         c.execute(sql, [chanid])
         conn.commit()
@@ -216,7 +216,6 @@ def remove_video(vidid=str):
     conn = connection()
     if conn:
         sql = "DELETE FROM videos WHERE id=?"
-        print(sql)
         c = sqlite3.Cursor(conn)
         c.execute(sql, [vidid])
         conn.commit()

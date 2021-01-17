@@ -10,9 +10,11 @@ def index():
 
 @app.route("/channels")
 def channels():
-    return render_template("channels.html",
-                           channels=db.select_all_channels())
+    return render_template("channels.html")
 
+@app.route("/videos")
+def videos():
+    return render_template("videos.html")
 
 @app.route("/api/add-channel", methods=["POST"])
 def add_channel():
@@ -39,17 +41,17 @@ def remove_channel():
 def add_video():
     req = request.get_json()
     print(req)
-    if api.add_video(req["vidid"], req["force"]):
+    if api.add_video(req):
         res = make_response(jsonify({"message": "Video added"}), 200)
     else:
-        res = make_response(jsonify({"message": "Not able to add channel"}), 500)
+        res = make_response(jsonify({"message": "Not able to add video"}), 500)
     return res
 
 @app.route("/api/remove-video", methods=["POST"])
 def remove_video():
     req = request.get_json()
     print(req)
-    if api.remove_video(req["vidid"]):
+    if api.remove_video(req):
         res = make_response(jsonify({"message": "Video removed"}), 200)
     else:
         res = make_response(jsonify({"message": "Not able to remove video"}), 500)

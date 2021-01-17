@@ -32,7 +32,6 @@ class FlaskConf(object):
 class GlobalConf(object):
     DataDirectory = config["Global"]["DataDirectory"]
     FFMpegPath = config["Global"]["ffmpeg_path"]
-    ChromeDriverPath = config["Global"]["chromedriver_path"]
     YTDLFormat = config["Global"]["ytdl_format"]
     MaxVideoThreads = config["Global"]["max_video_threads"]
     ScraperProxy = config["Global"]["scraper_proxy"]

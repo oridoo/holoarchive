@@ -6,13 +6,16 @@ from multiprocessing import Process
 import requests
 
 import dateparser
-import youtube_dlc
+import youtube_dlc as youtube_dl
+#import youtube_dl
 from bs4 import BeautifulSoup
 
 from holoarchive import db, config, ytdl_dict
 
-ytdl = youtube_dlc.YoutubeDL(ytdl_dict)
-
+ytdl = youtube_dl.YoutubeDL(ytdl_dict)
+ytdl_f = youtube_dl.YoutubeDL({
+    "extract_flat": "in_playlists"
+})
 
 def video_downloader(link):
     """
@@ -55,7 +58,7 @@ def stream_downloader(link):
                 time.sleep(30)
 
             else: return
-    except youtube_dlc.DownloadError:
+    except youtube_dl.DownloadError:
         return
 
 
@@ -230,7 +233,7 @@ class Controller:
                 for i in self.channels:
                     if (i["id"] == channel["id"] and i["downloadvideos"] == "False") or channel not in self.channels:
                         return
-                meta = ytdl.extract_info(chanurl, download=False)
+                meta = ytdl_f.extract_info(chanurl, download=False)
                 if meta:
                     ids = []
                     for entry in meta["entries"]:
@@ -272,7 +275,7 @@ class Controller:
                             try:
                                 meta = ytdl.extract_info(url,download=False)
                                 break
-                            except youtube_dlc.DownloadError as e:
+                            except youtube_dl.DownloadError as e:
                                 rdate = str(e).removeprefix("ERROR: This live event will begin ")
                                 rdate = dateparser.parse(rdate)
                                 date = datetime.datetime.now()

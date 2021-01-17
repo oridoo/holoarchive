@@ -1,73 +1,4 @@
-{% extends "holo_template.html" %}
-
-{% block title %}Dashboard{% endblock %}
-
-{% block main %}
-    <h2 class="display-4" style="text-align: center">Dashboard</h2>
-    <hr>
-    <div class="container-fluid">
-        <div class="card-deck justify-content-center h-50 text-center">
-            <div class="card text-white bg-primary mb-3" style="max-width: 18rem; max-height: 200px;">
-                <div class="card-header">Channels</div>
-                <div class="card-body">
-                    <h3 class="card-title" id="chan_count">0</h3>
-                </div>
-                <div class="card-footer">
-                    <p class="card-text">Number of channels in the database.</p>
-                </div>
-            </div>
-            <div class="card text-white bg-primary mb-3" style="max-width: 18rem; max-height: 200px;">
-                <div class="card-header">Videos</div>
-                <div class="card-body">
-                    <h3 class="card-title" id="vid_count">0</h3>
-                </div>
-                <div class="card-footer">
-                    <p class="card-text">Number of downloaded videos in the database.</p>
-                </div>
-            </div>
-            <div class="card text-white bg-secondary mb-3" style="max-width: 18rem; max-height: 200px;"
-                 id="avideos-card">
-                <div class="card-header">Active Videos <span class="badge badge-dark" id="a-videos-count">0</span></div>
-                <div class="card-body" style="overflow-y: scroll">
-                    <ul id="a-videos-list">
-
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <p class="card-text">Currently running video download threads.</p>
-                </div>
-            </div>
-            <div class="card text-white bg-secondary mb-3" style="max-width: 18rem; max-height: 200px;"
-                 id="astreams-card">
-                <div class="card-header">Active Streams <span class="badge badge-dark" id="a-streams-count">0</span>
-                </div>
-                <div class="card-body" style="overflow-y: scroll">
-                    <ul id="a-streams-list">
-                    </ul>
-                </div>
-                <div class="card-footer">
-                    <p class="card-text">Currently running stream capture threads.</p>
-                </div>
-            </div>
-            <div class="card text-white bg-dark mb-3" style="max-width: 18rem; max-height: 200px;">
-                <div class="card-header">Fetchers</div>
-                <div class="card-body">
-                    <h3 class="card-title" id="a_fetchers">0</h3>
-                </div>
-                <div class="card-footer">
-                    <p class="card-text">Currently running fetcher threads.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-{% endblock %}
-
-{% block script %}
-
-    <script>
-
-        async function fetchWithTimeout(resource, options) {
+async function fetchWithTimeout(resource, options) {
             const {timeout = 8000} = options;
 
             const controller = new AbortController();
@@ -157,6 +88,3 @@
 
         window.onload = get_status
         window.setInterval(get_status, 5000)
-    </script>
-
-{% endblock %}

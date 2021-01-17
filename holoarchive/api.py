@@ -52,7 +52,10 @@ def remove_channel(data):
 
 # TODO frontend
 def check_online(vidid):
-    meta = ytdl.extract_info(vidid, download=False)
+    meta = None
+    try:
+        meta = ytdl.extract_info(vidid, download=False)
+    except: pass
     if meta:
         return True
     else:
@@ -63,23 +66,29 @@ def check_offline(vidid):
         video = db.select_video(vidid)
         if os.path.isfile(video["filename"]):
             return True
-        else: return None
+        else:
+            db.remove_video(vidid)
+            return None
     else:
         return None
 
-def remove_video(vidid):
-    if db.video_exists(vidid):
+def remove_video(data):
+    vidid = data["vidid"]
+    if check_offline(vidid):
+        video = db.select_video(vidid)
         db.remove_video(vidid)
+        if bool(data["fs"]):
+            os.remove(video["filename"])
         return True
     else:
         return False
 
-def add_video(vidid, force=False):
-    if force:
-        core.ctrl.start_video_download(vidid)
+def add_video(data):
+    if bool(data["force"]):
+        core.ctrl.start_video_download(data["vidid"])
         return True
     else:
-        core.ctrl.add_videos([vidid])
+        core.ctrl.add_videos([data["vidid"]])
         return True
 
 def get_status():
