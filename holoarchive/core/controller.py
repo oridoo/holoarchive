@@ -14,7 +14,7 @@ from holoarchive import db, config, ytdl_dict
 
 ytdl = youtube_dl.YoutubeDL(ytdl_dict)
 ytdl_f = youtube_dl.YoutubeDL({
-    "extract_flat": "in_playlists"
+    "extract_flat": "in_playlist"
 })
 
 def video_downloader(link):
