@@ -50,7 +50,6 @@ def remove_channel(data):
     else:
         return True
 
-# TODO frontend
 def check_online(vidid):
     meta = None
     try:

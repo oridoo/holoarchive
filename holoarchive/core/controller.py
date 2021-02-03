@@ -43,17 +43,18 @@ def stream_downloader(link):
     try:
         meta = ytdl.extract_info(link, download=False)
         if meta:
-            filename = ytdl.prepare_filename(meta)
-            if not os.path.exists(os.path.dirname(filename)):
-                os.makedirs(os.path.dirname(filename))
+            filename_gen = ytdl.prepare_filename(meta)
+            if not os.path.exists(os.path.dirname(filename_gen)):
+                os.makedirs(os.path.dirname(filename_gen))
+            path, ext = os.path.splitext(filename_gen)
+            filename = path + ".mp4"
             proc = subprocess.call(
                 f"python -m streamlink -Q --hls-live-restart "
                 f"--hls-segment-timeout 40 --hls-segment-attempts 2 --hls-timeout 300 "
                 f'-o "{filename}" "{link}" best', shell=True)
-            if os.path.isfile(filename):
+            if os.path.isfile(filename) or os.path.isfile(filename_gen):
                 db_tuple = (meta["id"], link, meta["title"], meta["uploader_id"], filename)
                 db.add_video(db_tuple)
-                ytdl.process_info(meta)
                 ytdl.post_process(filename, ie_info=meta)
                 time.sleep(30)
 
