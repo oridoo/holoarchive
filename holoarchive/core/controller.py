@@ -24,8 +24,16 @@ def video_downloader(link):
     :param link: url of the video
     :return:
     """
+    possible_ext = [".mp4", ".webm", ".mkv", ".ts"]
     meta = ytdl.extract_info(str(link), download=True)
     filename = ytdl.prepare_filename(meta)
+    if not os.path.isfile(filename):
+        path, ext = os.path.splitext(filename)
+        for i in possible_ext:
+            fn = path + i
+            if os.path.isfile(fn):
+                filename = fn
+                break
     if os.path.isfile(filename):
         db_tuple = (meta["id"], link, meta["title"], meta["uploader_id"], filename)
         db.add_video(db_tuple)
