@@ -11,7 +11,9 @@ WORKDIR /app
 
 EXPOSE 5000
 
-RUN apt install ffmpeg
+RUN apt-get update -y
+RUN apt-get install ffmpeg -y
+RUN apt-get autoremove -y
 #RUN apt install gcc g++ make libffi-dev openssl-dev ffmpeg
 #RUN apt install atomicparsley
 RUN pip install -r /app/requirements.txt
