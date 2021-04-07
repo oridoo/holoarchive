@@ -6,7 +6,7 @@ from multiprocessing import Process
 import requests
 
 import dateparser
-import youtube_dlc as youtube_dl
+import yt_dlp as youtube_dl
 #import youtube_dl
 from bs4 import BeautifulSoup
 

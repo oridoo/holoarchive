@@ -3,7 +3,7 @@ import requests
 
 from bs4 import BeautifulSoup
 import humanize
-from youtube_dlc import YoutubeDL
+from yt_dlp import YoutubeDL
 
 from holoarchive import ytdl_dict, db, core, config
 
