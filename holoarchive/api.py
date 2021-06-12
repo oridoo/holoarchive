@@ -9,6 +9,7 @@ from holoarchive import ytdl_dict, db, core, config
 
 ytdl = YoutubeDL(ytdl_dict)
 ytdl_f = YoutubeDL({
+    "encoding": "utf-8-sig",
     "extract_flat": "in_playlist"
 })
 
@@ -36,7 +37,7 @@ def add_channel(data):
                 pass
         else:
             return False
-        id = url.rsplit('/', 1)[-1]
+        id = meta["channel_id"]
         print(id)
         if name and not db.channel_exists(id):
             db_tuple = (url.rsplit('/', 1)[-1], url, name,
