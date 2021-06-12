@@ -6,7 +6,8 @@ import humanize
 from yt_dlp import YoutubeDL
 
 from holoarchive import ytdl_dict, db, core, config
-
+ytdl_dict_flat = ytdl_dict
+ytdl_dict_flat["extract_flat"] = "in_playlist"
 ytdl = YoutubeDL(ytdl_dict)
 
 
@@ -22,10 +23,13 @@ def add_channel(data):
         name = False
         for i in range(3):
             try:
-                req = requests.get(url)
-                soup = BeautifulSoup(req.content, "html.parser")
-                meta = soup.find("meta", attrs={"property": "og:title"})
-                name = meta["content"]
+
+                #req = requests.get(url)
+                #soup = BeautifulSoup(req.content, "html.parser")
+                #meta = soup.find("meta", attrs={"property": "og:title"})
+                #name = meta["content"]
+                meta = ytdl.extract_info(url + "/featured",download=False)
+                name = meta["channel"]
                 break
             except:
                 pass
