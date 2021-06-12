@@ -15,7 +15,7 @@ ytdl_dict = dict({
     "simulate": False,
     "format": GlobalConf.YTDLFormat,
     "outtmpl": os.path.join(GlobalConf.DataDirectory, "%(uploader)s",
-                            "%(title)s - %(uploader)s - %(upload_date)s.%(ext)s"),
+                            "%(title)s - %(uploader)s - %(id)s.%(ext)s"),
     "sleep_interval": 5,
     "quiet": False,
     'writethumbnail': True,

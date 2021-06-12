@@ -95,9 +95,9 @@ def get_status():
     GET API for getting status of the daemon
     :rtype: dict
     """
-    disk_usage = shutil.disk_usage(config.GlobalConf.DataDirectory)._asdict()
-    for k, v in disk_usage.items():
-        disk_usage[k] = humanize.naturalsize(v)
+    #disk_usage = shutil.disk_usage(config.GlobalConf.DataDirectory)._asdict()
+    #for k, v in disk_usage.items():
+    #    disk_usage[k] = humanize.naturalsize(v)
     channel_count = len(core.ctrl.channels)
     video_count = len(core.ctrl.videos)
     active_streams = core.ctrl.active_streams
@@ -106,7 +106,7 @@ def get_status():
     videos_downloaded_count = db.video_count()
     downloading_streams = str(core.ctrl.download_streams)
     downloading_videos = str(core.ctrl.download_videos)
-    status = dict(disk=disk_usage,
+    status = dict(#disk=disk_usage,
                   chan_count=channel_count,
                   vid_count=video_count,
                   a_streams=active_streams,
