@@ -6,10 +6,11 @@ import humanize
 from yt_dlp import YoutubeDL
 
 from holoarchive import ytdl_dict, db, core, config
-ytdl_dict_flat = ytdl_dict
-ytdl_dict_flat["extract_flat"] = "in_playlist"
-ytdl = YoutubeDL(ytdl_dict)
 
+ytdl = YoutubeDL(ytdl_dict)
+ytdl_f = YoutubeDL({
+    "extract_flat": "in_playlist"
+})
 
 def add_channel(data):
     """
@@ -28,11 +29,13 @@ def add_channel(data):
                 #soup = BeautifulSoup(req.content, "html.parser")
                 #meta = soup.find("meta", attrs={"property": "og:title"})
                 #name = meta["content"]
-                meta = ytdl.extract_info(url + "/featured",download=False)
+                meta = ytdl_f.extract_info(url + "/featured",download=False)
                 name = meta["channel"]
                 break
             except:
                 pass
+        else:
+            return False
         id = url.rsplit('/', 1)[-1]
         print(id)
         if name and not db.channel_exists(id):
